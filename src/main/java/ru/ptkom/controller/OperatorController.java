@@ -1,19 +1,25 @@
 package ru.ptkom.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ru.ptkom.configuration.WebSecurityConfiguration;
 import ru.ptkom.dao.OperatorDAO;
 import ru.ptkom.model.Operator;
 import ru.ptkom.service.OperatorReportService;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
 @RestController
-@CrossOrigin
 public class OperatorController {
+
+    private static final Logger log = LoggerFactory.getLogger(OperatorController .class);
 
     private final OperatorDAO operatorDAO;
 

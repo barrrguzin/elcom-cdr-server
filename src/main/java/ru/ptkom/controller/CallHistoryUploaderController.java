@@ -1,5 +1,7 @@
 package ru.ptkom.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +15,13 @@ import java.io.InputStream;
 @CrossOrigin
 public class CallHistoryUploaderController {
 
+    private static final Logger log = LoggerFactory.getLogger(CallHistoryUploaderController.class);
+
     private final CDRDatabaseStorageService cdrDatabaseStorageService;
 
     public CallHistoryUploaderController(CDRDatabaseStorageService cdrDatabaseStorageService) {
         this.cdrDatabaseStorageService = cdrDatabaseStorageService;
-        System.err.println("CallHistoryUploaderController got");
+        log.info("CallHistoryUploaderController got");
     }
 
     @GetMapping(value = "/force-daily-upload", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -1,7 +1,10 @@
 package ru.ptkom.configuration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -12,36 +15,65 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import ru.ptkom.service.ConfigurationFIleService;
 
 
 import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@PropertySource("classpath:application.properties")
 @EnableTransactionManagement
 @EnableJpaRepositories("ru.ptkom.repository")
+@DependsOn("configurationFIleService")
 public class SpringDataConfiguration {
+
+    private final static Logger log = LoggerFactory.getLogger(SpringDataConfiguration.class);
+
+    private final ConfigurationFIleService configurationFIleService;
+
+    private final static String DATABASE_URL_TEMPLATE = "jdbc:postgresql://%s:%s/%s";
+    private final static String DATABASE_DRIVER_CLASS_NAME = "org.postgresql.Driver";
+
+    private Boolean debug;
+    private String databaseServer;
+    private String databasePort;
+    private String databaseName;
+    private String databaseUsername;
+    private String databasePassword;
+
+    public SpringDataConfiguration(ConfigurationFIleService configurationFIleService) {
+        this.configurationFIleService = configurationFIleService;
+        initializeConfigurationProperties();
+    }
+
+    private void initializeConfigurationProperties() {
+        debug = configurationFIleService.getHibernateDebug();
+        databaseServer = configurationFIleService.getDatabaseAddress();
+        databasePort = configurationFIleService.getDatabasePort();
+        databaseName = configurationFIleService.getDatabaseName();
+        databaseUsername = configurationFIleService.getDatabaseUsername();
+        databasePassword = configurationFIleService.getDatabasePassword();
+    }
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean em
+        LocalContainerEntityManagerFactoryBean entityManager
                 = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
-        em.setPackagesToScan("ru.ptkom.model");
+        entityManager.setDataSource(dataSource());
+        entityManager.setPackagesToScan("ru.ptkom.model");
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        em.setJpaVendorAdapter(vendorAdapter);
-        em.setJpaProperties(additionalProperties());
-        return em;
+        entityManager.setJpaVendorAdapter(vendorAdapter);
+        entityManager.setJpaProperties(additionalProperties());
+        return entityManager;
     }
 
     @Bean
     public DataSource dataSource(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/elcom");
-        dataSource.setUsername("barguzin");
-        dataSource.setPassword("123456");
+        dataSource.setDriverClassName(DATABASE_DRIVER_CLASS_NAME);
+        dataSource.setUrl(String.format(DATABASE_URL_TEMPLATE, databaseServer, databasePort, databaseName));
+        dataSource.setUsername(databaseUsername);
+        dataSource.setPassword(databasePassword);
         return dataSource;
     }
 
@@ -49,15 +81,14 @@ public class SpringDataConfiguration {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "update");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-
-//        properties.setProperty("hibernate.order_updates", "true");
-//        properties.setProperty("hibernate.order_inserts", "true");
-//        properties.setProperty("hibernate.show_sql", "true");
-//        properties.setProperty("hibernate.format_sql", "true");
-//        properties.setProperty("hibernate.use_sql_comments", "true");
-//        properties.setProperty("hibernate.jdbc.batch_size", "1000");
-
-
+        if (debug) {
+            properties.setProperty("hibernate.order_updates", "true");
+            properties.setProperty("hibernate.order_inserts", "true");
+            properties.setProperty("hibernate.show_sql", "true");
+            properties.setProperty("hibernate.format_sql", "true");
+            properties.setProperty("hibernate.use_sql_comments", "true");
+            properties.setProperty("hibernate.jdbc.batch_size", "1000");
+        }
         return properties;
     }
 

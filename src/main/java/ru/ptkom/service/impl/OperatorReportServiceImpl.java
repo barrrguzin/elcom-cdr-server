@@ -34,9 +34,13 @@ public class OperatorReportServiceImpl implements OperatorReportService {
         this.callDataDAO = callDataDAO;
         this.operatorDAO = operatorDAO;
         this.configurationFIleService = configurationFIleService;
+        this.maliService = maliService;
+        initializeConfigurationProperties();
+    }
+
+    private void initializeConfigurationProperties() {
         INCOMING = configurationFIleService.getKeyOfIncomingReport();
         OUTGOING = configurationFIleService.getKeyOfOutgoingReport();
-        this.maliService = maliService;
     }
 
     @Override

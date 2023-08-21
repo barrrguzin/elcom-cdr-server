@@ -3,32 +3,49 @@ package ru.ptkom.configuration;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
-import jakarta.mail.util.LineInputStream;
-import jakarta.mail.util.LineOutputStream;
-import jakarta.mail.util.StreamProvider;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import ru.ptkom.service.ConfigurationFIleService;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Properties;
 
 @Configuration
 public class SMTPConfiguration {
 
-    private Boolean authentication = false;
-    private String username = "";
-    private String password = "";
+    private Boolean smtpAuthentication;
+    private String smtpUsername;
+    private String smtpPassword;
+    private String smtpServerAddress;
+    private String smtpServerPort;
+    private Boolean debug;
+    private Boolean smtpTLS;
 
+    private final ConfigurationFIleService configurationFIleService;
+
+    public SMTPConfiguration(ConfigurationFIleService configurationFIleService) {
+        this.configurationFIleService = configurationFIleService;
+        initializeConfigurationProperties();
+    }
+
+    private void initializeConfigurationProperties() {
+       smtpAuthentication = configurationFIleService.getSmtpAuthentication();
+       if (smtpAuthentication) {
+           smtpUsername = configurationFIleService.getSmtpAuthenticationUsername();
+           smtpPassword = configurationFIleService.getSmtpAuthenticationPassword();
+       }
+       smtpServerAddress = configurationFIleService.getSmtpServerAddress();
+       smtpServerPort = configurationFIleService.getSmtpServerPort();
+       debug = configurationFIleService.getSmtpDebug();
+       smtpTLS = configurationFIleService.getSmtpTLS();
+    }
 
     @Bean(name = "mailSession")
     public Session getMailSession() {
-        if (authentication) {
+        if (smtpAuthentication) {
             return Session.getInstance(setProperties(), new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(username, password);
+                    return new PasswordAuthentication(smtpUsername, smtpPassword);
                 }
             });
         } else {
@@ -38,12 +55,14 @@ public class SMTPConfiguration {
 
     private Properties setProperties() {
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", false);
-        properties.put("mail.smtp.host", "mail.ptkom.ru");
-        properties.put("mail.smtp.port", "25");
-        //properties.put("mail.debug", "true");
+        properties.put("mail.smtp.auth", smtpAuthentication);
+        properties.put("mail.smtp.host", smtpServerAddress);
+        properties.put("mail.smtp.port", smtpServerPort);
+        properties.put("mail.debug", debug);
+        if (smtpTLS) {
+            properties.put("mail.smtp.starttls.enable", smtpTLS);
+        }
         //properties.put("mail.smtp.ssl.trust", "");
-        //properties.put("mail.smtp.starttls.enable", "false");
         return properties;
     }
 

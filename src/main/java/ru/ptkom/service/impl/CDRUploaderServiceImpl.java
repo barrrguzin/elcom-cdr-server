@@ -10,9 +10,12 @@ import com.hierynomus.smbj.auth.AuthenticationContext;
 import com.hierynomus.smbj.connection.Connection;
 import com.hierynomus.smbj.session.Session;
 import com.hierynomus.smbj.share.DiskShare;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.ptkom.model.CallData;
 import ru.ptkom.service.CDRUploaderService;
+import ru.ptkom.service.ConfigurationFIleService;
 
 import java.io.*;
 import java.util.Collections;
@@ -23,19 +26,33 @@ import java.util.stream.Collectors;
 @Service
 public class CDRUploaderServiceImpl implements CDRUploaderService {
 
-    public CDRUploaderServiceImpl() {
-        System.err.println("CDRUploaderService got");
-    }
+    private static final Logger log = LoggerFactory.getLogger(CDRUploaderServiceImpl.class);
 
-    private String domain = "";
-    private String user = "";
-    private String pass = "";
-    private String sharedFolder = "";
-    private String ipAddress = "";
-    private String pathToFolder = "";
+    private final ConfigurationFIleService configurationFIleService;
+
     private static final String SPLIT = "\\";
 
+    private String smbDomain;
+    private String smbUsername;
+    private String smbPassword;
+    private String smbSharedFolder;
+    private String smbIpAddress;
+    private String pathToFolder;
 
+    public CDRUploaderServiceImpl(ConfigurationFIleService configurationFIleService) {
+        this.configurationFIleService = configurationFIleService;
+        initializeConfigurationProperties();
+        log.info("CDRUploaderService got");
+    }
+
+    private void initializeConfigurationProperties() {
+        smbDomain = configurationFIleService.getActiveDirectoryDomain();
+        smbUsername = configurationFIleService.getSmbUsername();
+        smbPassword = configurationFIleService.getSmbPassword();
+        smbSharedFolder = configurationFIleService.getSmbSharedFolder();
+        smbIpAddress = configurationFIleService.getSmbIpAddress();
+        pathToFolder = configurationFIleService.getSmbPathToFolder();
+    }
 
     public List<CallData> openFileOnRemoteSMBFolderAndGetCallDataList(String fileName) {
         return getCallDataListFromInputStream(openRemoteFile(pathToFolder + SPLIT + fileName));
@@ -79,12 +96,12 @@ public class CDRUploaderServiceImpl implements CDRUploaderService {
     private DiskShare connectToRemoteFolder() {
         SMBClient client = new SMBClient();
         try {
-            Connection connection = client.connect(ipAddress);
-            AuthenticationContext ac = new AuthenticationContext(user, pass.toCharArray(), domain);
+            Connection connection = client.connect(smbIpAddress);
+            AuthenticationContext ac = new AuthenticationContext(smbUsername, smbPassword.toCharArray(), smbDomain);
             Session session = connection.authenticate(ac);
-            return (DiskShare) session.connectShare(sharedFolder);
+            return (DiskShare) session.connectShare(smbSharedFolder);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to connect remote folder \\\\"+ipAddress+"\\"+sharedFolder + " by user "+domain+"\\"+user);
+            throw new RuntimeException("Unable to connect remote folder \\\\"+ smbIpAddress +"\\"+ smbSharedFolder + " by user "+ smbDomain +"\\"+smbUsername);
         }
     }
 }

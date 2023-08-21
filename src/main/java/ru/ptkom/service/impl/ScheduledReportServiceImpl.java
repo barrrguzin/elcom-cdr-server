@@ -31,13 +31,15 @@ public class ScheduledReportServiceImpl implements ScheduledReportService {
 
     @Scheduled(cron = "@hourly")
     private void checkReportQuery() {
-        for (ReportTemplate reportTemplate : templateQuery) {
-            if (reportTemplate.getPeriod() == ReportPeriod.DAILY) {
-                checkTimeAndMakeDailyReport(reportTemplate);
-            } else if (reportTemplate.getPeriod() == ReportPeriod.WEEKLY) {
-                checkTimeAndMakeWeeklyReport(reportTemplate);
-            } else if (reportTemplate.getPeriod() == ReportPeriod.MONTHLY) {
-                checkTimeAndMakeMonthlyReport(reportTemplate);
+        if (templateQuery != null) {
+            for (ReportTemplate reportTemplate : templateQuery) {
+                if (reportTemplate.getPeriod() == ReportPeriod.DAILY) {
+                    checkTimeAndMakeDailyReport(reportTemplate);
+                } else if (reportTemplate.getPeriod() == ReportPeriod.WEEKLY) {
+                    checkTimeAndMakeWeeklyReport(reportTemplate);
+                } else if (reportTemplate.getPeriod() == ReportPeriod.MONTHLY) {
+                    checkTimeAndMakeMonthlyReport(reportTemplate);
+                }
             }
         }
     }

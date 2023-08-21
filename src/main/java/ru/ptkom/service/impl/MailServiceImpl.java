@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Service
 public class MailServiceImpl implements MaliService {
 
-    private static String INCOMING;
-    private static String OUTGOING;
+    private String INCOMING;
+    private String OUTGOING;
 
     private static final String TABLE_HEAD = "<table><thead><tr><th><strong>Оператор:</strong></th><th><strong>Входящие:</strong></th><th><strong>Исходящие:</strong></th></tr></thead><tbody>";
 
@@ -28,8 +28,11 @@ public class MailServiceImpl implements MaliService {
     public MailServiceImpl(Session mailSession, ConfigurationFIleService configurationFIleService) {
         this.mailSession = mailSession;
         this.configurationFIleService = configurationFIleService;
-        INCOMING = this.configurationFIleService.getKeyOfIncomingReport();
-        OUTGOING = this.configurationFIleService.getKeyOfOutgoingReport();
+    }
+
+    private void initializeConfigurationProperties() {
+        INCOMING = configurationFIleService.getKeyOfIncomingReport();
+        OUTGOING = configurationFIleService.getKeyOfOutgoingReport();
     }
 
     @Override

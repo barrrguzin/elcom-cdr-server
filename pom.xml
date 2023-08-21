@@ -19,6 +19,8 @@
         <spring.data.version>2.7.13</spring.data.version>
         <hibernate.version>5.6.9.Final</hibernate.version>
         <project.build.directory></project.build.directory>
+        <spring-security-version>5.8.4</spring-security-version>
+        <slf4j.version>1.7.32</slf4j.version>
     </properties>
 
     <repositories>
@@ -48,6 +50,31 @@
             <artifactId>spring-data-jpa</artifactId>
             <version>${spring.data.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${spring-security-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring-security-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-ldap</artifactId>
+            <version>${spring-security-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring-security-version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -97,17 +124,20 @@
             <artifactId>angus-mail</artifactId>
             <version>2.0.2</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>jakarta.mail</groupId>-->
-<!--            <artifactId>jakarta.mail-api</artifactId>-->
-<!--            <version>2.1.2</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
     </dependencies>
